@@ -1,6 +1,6 @@
 Name:           squeezed
-Version:        0.11.0
-Release:        2%{?dist}
+Version:        0.12.1
+Release:        1%{?dist}
 Summary:        Memory ballooning daemon for the xapi toolstack
 License:        LGPL
 URL:            https://github.com/xapi-project/squeezed
@@ -38,30 +38,52 @@ Memory ballooning daemon for the xapi toolstack.
 cp %{SOURCE1} squeezed-init
 cp %{SOURCE2} squeezed-conf
 
+
+# we have two builds (regular, coverage) and install binaries from both
+# under different names
+
 %build
-./configure --prefix %{_prefix} --destdir %{buildroot}
+./configure --prefix %{_prefix} --destdir %{_buildroot}
 make
+mv _build/src/squeezed.native squeezed.bin
+
+make clean
+
+./configure --prefix %{_prefix} --destdir %{_buildroot}
+make coverage
+make
+mv _build/src/squeezed.native squeezed.cov
+
 
 %install
-install -D -m 0755 squeezed.native %{buildroot}%{_sbindir}/squeezed
+# touch %ghost'ed files that are created during installation
+mkdir -p %{buildroot}%{_sbindir}
+touch %{buildroot}%{_sbindir}/squeezed
+
+install -D -m 0755 squeezed.bin  %{buildroot}%{_sbindir}/squeezed.bin
+install -D -m 0755 squeezed.cov  %{buildroot}%{_sbindir}/squeezed.cov
 install -D -m 0755 squeezed-init %{buildroot}%{_sysconfdir}/init.d/squeezed
 install -D -m 0644 squeezed-conf %{buildroot}%{_sysconfdir}/squeezed.conf
 
 
 %files
-%doc README.md 
-%doc LICENSE 
+%doc README.md
+%doc LICENSE
 %doc MAINTAINERS
-%{_sbindir}/squeezed
+%ghost %{_sbindir}/squeezed
+%{_sbindir}/squeezed.bin
 %{_sysconfdir}/init.d/squeezed
 %config %{_sysconfdir}/squeezed.conf
 
 %post
 case $1 in
   1) # install
+    ln -s %{_sbindir}/squeezed.bin %{_sbindir}/squeezed
     /sbin/chkconfig --add squeezed
     ;;
   2) # upgrade
+    rm -f %{_sbindir}/squeezed
+    ln -s %{_sbindir}/squeezed.bin %{_sbindir}/squeezed
     /sbin/chkconfig --del squeezed
     /sbin/chkconfig --add squeezed
     ;;
@@ -77,7 +99,50 @@ case $1 in
     ;;
 esac
 
+# -- coverage
+
+%package        coverage
+Summary:        Enable coverage profiling for this package
+Requires:       %{name} = %{version}-%{release}
+
+%description    coverage
+Memory ballooning daemon for the xapi toolstack with coverage profiling
+enabled.
+
+%files coverage
+%ghost %{_sbindir}/squeezed
+%{_sbindir}/squeezed.cov
+
+%post coverage
+case $1 in
+  1) # install
+    ln -s %{_sbindir}/squeezed.cov %{_sbindir}/squeezed
+    /sbin/chkconfig --add squeezed
+    ;;
+  2) # upgrade
+    rm -f %{_sbindir}/squeezed
+    ln -s %{_sbindir}/squeezed.cov %{_sbindir}/squeezed
+    /sbin/chkconfig --del squeezed
+    /sbin/chkconfig --add squeezed
+    ;;
+esac
+
+%preun coverage
+case $1 in
+  0) # uninstall
+    /sbin/service squeezed stop >/dev/null 2>&1 || :
+    /sbin/chkconfig --del squeezed
+    ;;
+  1) # upgrade
+    ;;
+esac
+
+
+
 %changelog
+* Fri May 20 2016 Christian Lindig <christian.lindig@citrix.com> - 0.12.1-1
+- New sub-package for coverage analysis (from new upstream release)
+
 * Mon May 16 2016 Si Beaumont <simon.beaumont@citrix.com> - 0.11.0-2
 - Re-run chkconfig on upgrade
 
