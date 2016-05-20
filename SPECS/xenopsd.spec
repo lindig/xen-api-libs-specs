@@ -310,7 +310,7 @@ esac
 
 
 %changelog
-* Fri May 20 2016 Christian Lindig <christian.lindig@citrix.com> - * 0.12.1-1
+* Fri May 20 2016 Christian Lindig <christian.lindig@citrix.com> - 0.12.1-1
 - New upstream release that supports coverage analysis
 - Introduce subpackages *-cov for coverage analysis
 
