@@ -23,7 +23,6 @@ BuildRequires:  ocaml-xen-api-client-devel
 BuildRequires:  ocaml-netlink-devel
 BuildRequires:  libffi-devel
 BuildRequires:  ocaml-bisect-ppx-devel
-BuildRequires:  rsync
 Requires:       ethtool
 Requires:       libnl3
 #Requires:       redhat-lsb-core
@@ -43,27 +42,30 @@ cp %{SOURCE3} xcp-networkd-network-conf
 #cp %{SOURCE4} xcp-networkd-bridge-conf
 
 %build
-mkdir root1 root2
+mkdir build-bin build-cov
 make
-make install DESTDIR=$PWD/root1 BINDIR=%{_bindir} SBINDIR=%{_sbindir}
+make install DESTDIR=$PWD/build-bin BINDIR=%{_bindir} SBINDIR=%{_sbindir}
 
 make clean
 make coverage
 make
-make install DESTDIR=$PWD/root2 BINDIR=%{_bindir} SBINDIR=%{_sbindir}
+make install DESTDIR=$PWD/build-cov BINDIR=%{_bindir} SBINDIR=%{_sbindir}
 
 %install
-rsync -a $PWD/root2/ %{buildroot}
+(cd $PWD/build-cov; tar cf - .) | (cd %{buildroot}; tar xf -)
+
 # rename
 mv    %{buildroot}%{_sbindir}/xcp-networkd %{buildroot}%{_sbindir}/xcp-networkd.cov
 mv    %{buildroot}%{_bindir}/networkd_db   %{buildroot}%{_bindir}/networkd_db.cov
 
-rsync -a $PWD/root1/ %{buildroot}
+(cd $PWD/build-bin; tar cf - .) | (cd %{buildroot}; tar xf -)
 mv    %{buildroot}%{_sbindir}/xcp-networkd %{buildroot}%{_sbindir}/xcp-networkd.bin
 mv    %{buildroot}%{_bindir}/networkd_db   %{buildroot}%{_bindir}/networkd_db.bin
 
+# touch %ghost'ed files; these are created dynamically during installation
 touch %{buildroot}%{_sbindir}/xcp-networkd
 touch %{buildroot}%{_bindir}/networkd_db
+
 install -D -m 0755 xcp-networkd-init %{buildroot}%{_sysconfdir}/init.d/xcp-networkd
 install -D -m 0644 xcp-networkd-network-conf %{buildroot}/etc/xensource/network.conf
 install -D -m 0644 xcp-networkd-conf %{buildroot}/etc/xcp-networkd.conf
@@ -140,9 +142,9 @@ esac
 
 
 %changelog
-* Fri May 20 2016 Christian Lindig <christian.lindig@citrix.com>
+* Fri May 20 2016 Christian Lindig <christian.lindig@citrix.com> - 0.10.1-1
 - New upstream release that supports coverage profiling
-- introduce sub package for coverage profiling
+- introduce subpackage for coverage profiling
 
 * Mon May 16 2016 Si Beaumont <simon.beaumont@citrix.com> - 0.9.6-2
 - Re-run chkconfig on upgrade
