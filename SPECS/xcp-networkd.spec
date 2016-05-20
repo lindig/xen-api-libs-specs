@@ -1,6 +1,6 @@
 Name:           xcp-networkd
-Version:        0.9.6
-Release:        2%{?dist}
+Version:        0.10.1
+Release:        1%{?dist}
 Summary:        Simple host network management service for the xapi toolstack
 License:        LGPL
 URL:            https://github.com/xapi-project/xcp-networkd
@@ -23,6 +23,7 @@ BuildRequires:  ocaml-xen-api-client-devel
 BuildRequires:  ocaml-netlink-devel
 BuildRequires:  libffi-devel
 BuildRequires:  ocaml-bisect-ppx-devel
+BuildRequires:  rsync
 Requires:       ethtool
 Requires:       libnl3
 #Requires:       redhat-lsb-core
@@ -42,24 +43,38 @@ cp %{SOURCE3} xcp-networkd-network-conf
 #cp %{SOURCE4} xcp-networkd-bridge-conf
 
 %build
+mkdir root1 root2
 make
+make install DESTDIR=$PWD/root1 BINDIR=%{_bindir} SBINDIR=%{_sbindir}
+
+make clean
+make coverage
+make
+make install DESTDIR=$PWD/root2 BINDIR=%{_bindir} SBINDIR=%{_sbindir}
 
 %install
-mkdir -p %{buildroot}/%{_sbindir}
-mkdir -p %{buildroot}/%{_bindir}
-make install DESTDIR=%{buildroot} BINDIR=%{_bindir} SBINDIR=%{_sbindir}
-mkdir -p %{buildroot}%{_sysconfdir}/init.d
-install -m 0755 xcp-networkd-init %{buildroot}%{_sysconfdir}/init.d/xcp-networkd
-mkdir -p %{buildroot}/etc/xensource
-install -m 0644 xcp-networkd-network-conf %{buildroot}/etc/xensource/network.conf
-install -m 0644 xcp-networkd-conf %{buildroot}/etc/xcp-networkd.conf
-mkdir -p %{buildroot}/etc/modprobe.d
-#install -m 0644 xcp-networkd-bridge-conf %{buildroot}/etc/modprobe.d/bridge.conf
+rsync -a $PWD/root2/ %{buildroot}
+# rename
+mv    %{buildroot}%{_sbindir}/xcp-networkd %{buildroot}%{_sbindir}/xcp-networkd.cov
+mv    %{buildroot}%{_bindir}/networkd_db   %{buildroot}%{_bindir}/networkd_db.cov
+
+rsync -a $PWD/root1/ %{buildroot}
+mv    %{buildroot}%{_sbindir}/xcp-networkd %{buildroot}%{_sbindir}/xcp-networkd.bin
+mv    %{buildroot}%{_bindir}/networkd_db   %{buildroot}%{_bindir}/networkd_db.bin
+
+touch %{buildroot}%{_sbindir}/xcp-networkd
+touch %{buildroot}%{_bindir}/networkd_db
+install -D -m 0755 xcp-networkd-init %{buildroot}%{_sysconfdir}/init.d/xcp-networkd
+install -D -m 0644 xcp-networkd-network-conf %{buildroot}/etc/xensource/network.conf
+install -D -m 0644 xcp-networkd-conf %{buildroot}/etc/xcp-networkd.conf
+
 
 %files
 %doc README.markdown LICENSE MAINTAINERS
-%{_sbindir}/xcp-networkd
-%{_bindir}/networkd_db
+%ghost %{_sbindir}/xcp-networkd
+%ghost %{_bindir}/networkd_db
+%{_sbindir}/xcp-networkd.bin
+%{_bindir}/networkd_db.bin
 %{_sysconfdir}/init.d/xcp-networkd
 %{_mandir}/man1/xcp-networkd.1.gz
 #/etc/modprobe.d/bridge.conf
@@ -69,9 +84,15 @@ mkdir -p %{buildroot}/etc/modprobe.d
 %post
 case $1 in
   1) # install
+    ln -s %{_sbindir}/xcp-networkd.bin  %{_sbindir}/xcp-networkd
+    ln -s %{_bindir}/networkd_db.bin    %{_bindir}/networkd_db
     /sbin/chkconfig --add xcp-networkd
     ;;
   2) # upgrade
+    rm -f %{_sbindir}/xcp-networkd
+    rm -f %{_bindir}/networkd_db
+    ln -s %{_sbindir}/xcp-networkd.bin  %{_sbindir}/xcp-networkd
+    ln -s %{_bindir}/networkd_db.bin    %{_bindir}/networkd_db
     /sbin/chkconfig --del xcp-networkd
     /sbin/chkconfig --add xcp-networkd
     ;;
@@ -87,7 +108,42 @@ case $1 in
     ;;
 esac
 
+%package coverage
+Summary: Simple host network management service for the xapi toolstack:
+Requires:       %{name} = %{version}-%{release}
+
+%description coverage
+This package enables coverage profiling.
+
+%files coverage
+%ghost %{_sbindir}/xcp-networkd
+%ghost %{_bindir}/networkd_db
+%{_sbindir}/xcp-networkd.cov
+%{_bindir}/networkd_db.cov
+
+%post coverage
+case $1 in
+  1) # install
+    ln -s %{_sbindir}/xcp-networkd.cov  %{_sbindir}/xcp-networkd
+    ln -s %{_bindir}/networkd_db.cov    %{_bindir}/networkd_db
+    /sbin/chkconfig --add xcp-networkd
+    ;;
+  2) # upgrade
+    rm -f %{_sbindir}/xcp-networkd
+    rm -f %{_bindir}/networkd_db
+    ln -s %{_sbindir}/xcp-networkd.cov  %{_sbindir}/xcp-networkd
+    ln -s %{_bindir}/networkd_db.cov    %{_bindir}/networkd_db
+    /sbin/chkconfig --del xcp-networkd
+    /sbin/chkconfig --add xcp-networkd
+    ;;
+esac
+
+
 %changelog
+* Fri May 20 2016 Christian Lindig <christian.lindig@citrix.com>
+- New upstream release that supports coverage profiling
+- introduce sub package for coverage profiling
+
 * Mon May 16 2016 Si Beaumont <simon.beaumont@citrix.com> - 0.9.6-2
 - Re-run chkconfig on upgrade
 
@@ -111,3 +167,4 @@ esac
 * Wed Jun  5 2013 David Scott <dave.scott@eu.citrix.com>
 - Initial package
 
+# vim: set ts=2 sw=2 et:
