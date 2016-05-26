@@ -1,6 +1,6 @@
 Name:           xenopsd
 Version:        0.12.1
-Release:        2%{?dist}
+Release:        1%{?dist}
 Summary:        Simple VM manager
 License:        LGPL
 URL:            https://github.com/xapi-project/xenopsd
@@ -225,9 +225,7 @@ esac
 %post xc-cov
 case $1 in
   1) # install
-    rm -f %{_sbindir}/xenopsd-xc
     ln -s %{_sbindir}/xenopsd-xc.cov %{_sbindir}/xenopsd-xc
-    rm -f %{_libexecdir}/%{name}/set-domain-uuid
     ln -s %{_libexecdir}/%{name}/set-domain-uuid.cov %{_libexecdir}/%{name}/set-domain-uuid
     /sbin/chkconfig --add xenopsd-xc
     ;;
@@ -312,9 +310,6 @@ esac
 
 
 %changelog
-* Thu May 26 2016 Christian Lindig <christian.lindig@citrix.com> - 0.12.1-2
-- Fix %post xc-cov: have to rm existing symlink just like in upgrade
-
 * Fri May 20 2016 Christian Lindig <christian.lindig@citrix.com> - 0.12.1-1
 - New upstream release that supports coverage analysis
 - Introduce subpackages *-cov for coverage analysis
