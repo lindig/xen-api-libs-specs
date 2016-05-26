@@ -1,6 +1,6 @@
 Name:           xcp-networkd
 Version:        0.10.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Simple host network management service for the xapi toolstack
 License:        LGPL
 URL:            https://github.com/xapi-project/xcp-networkd
@@ -126,6 +126,8 @@ This package enables coverage profiling.
 %post coverage
 case $1 in
   1) # install
+    rm -f %{_sbindir}/xcp-networkd
+    rm -f %{_bindir}/networkd_db
     ln -s %{_sbindir}/xcp-networkd.cov  %{_sbindir}/xcp-networkd
     ln -s %{_bindir}/networkd_db.cov    %{_bindir}/networkd_db
     /sbin/chkconfig --add xcp-networkd
@@ -142,6 +144,9 @@ esac
 
 
 %changelog
+* Thu May 26 2016 Christian Lindig <christian.lindig@citrix.com> - 0.10.1-2
+- fix %post coverage: remove existing symlink before creatign new one
+
 * Fri May 20 2016 Christian Lindig <christian.lindig@citrix.com> - 0.10.1-1
 - New upstream release that supports coverage profiling
 - introduce subpackage for coverage profiling
