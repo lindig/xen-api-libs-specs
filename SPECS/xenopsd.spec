@@ -36,6 +36,7 @@ BuildRequires:  ocaml-uutf-devel
 BuildRequires:  ocaml-xcp-rrd-devel
 BuildRequires:  python-devel
 BuildRequires:  ocaml-bisect-ppx-devel
+BuildRequires:  rsync
 Requires:       message-switch
 Requires:       xenops-cli
 Requires:       xen-dom0-tools
@@ -51,6 +52,7 @@ Simple VM manager for the xapi toolstack.
 Summary:        Xenopsd using xc
 Requires:       %{name} = %{version}-%{release}
 Requires:       forkexecd
+#Requires:       vncterm
 Requires:       xen-libs
 
 %description    xc
@@ -60,6 +62,7 @@ Simple VM manager for Xen using libxc.
 Summary:        Xenopsd using xc
 Requires:       %{name} = %{version}-%{release}
 Requires:       forkexecd
+#Requires:       vncterm
 Requires:       xen-libs
 
 %description    xc-cov
@@ -112,25 +115,25 @@ cp %{SOURCE7} xenopsd-64-conf
 
 %build
 # this is a hack: we build and install two builds into the source
-# directory under build-bin/ and build-cov/. In the install step all we do is
+# directory under root1 and root2. In the install step all we do is
 # copying files from it.
 
-mkdir build-bin build-cov
+mkdir root1 root2
 ./configure --libexecdir %{_libexecdir}/%{name}
 
 # regular build
 make
-make install DESTDIR=$PWD/build-bin LIBEXECDIR=%{_libexecdir}/%{name} SBINDIR=%{_sbindir} MANDIR=%{_mandir} 
+make install DESTDIR=$PWD/root1 LIBEXECDIR=%{_libexecdir}/%{name} SBINDIR=%{_sbindir} MANDIR=%{_mandir} 
 make clean
 
 # now build for coverage profiling
 make coverage
 make
-make install DESTDIR=$PWD/build-cov LIBEXECDIR=%{_libexecdir}/%{name} SBINDIR=%{_sbindir} MANDIR=%{_mandir} 
+make install DESTDIR=$PWD/root2 LIBEXECDIR=%{_libexecdir}/%{name} SBINDIR=%{_sbindir} MANDIR=%{_mandir} 
 
 %install
-# this installs the files from the bin build
-(cd build-bin/; tar cf - .) | (cd %{buildroot}; tar xf -)
+# this installs the files from the first build
+rsync -a root1/ %{buildroot} 
 
 # rename regular binaries
 mv %{buildroot}%{_sbindir}/xenopsd-xc                     %{buildroot}%{_sbindir}/xenopsd-xc.bin
@@ -138,17 +141,17 @@ mv %{buildroot}%{_libexecdir}/%{name}/set-domain-uuid     %{buildroot}%{_libexec
 # mv %{buildroot}%{_sbindir}/xenopsd-xenlight       %{buildroot}%{_sbindir}/xenopsd-xenlight.bin 
 # mv %{buildroot}%{_sbindir}/xenopsd-simulator      %{buildroot}%{_sbindir}/xenopsd-simulator.bin
 
-# install selected binaries with coverage profiling from coverage build
+# install selected binaries with coverage profiling from second build
 install -D ./xenops_xc_main.native        %{buildroot}%{_sbindir}/xenopsd-xc.cov
 install -D ./set_domain_uuid.native       %{buildroot}%{_libexecdir}/%{name}/set-domain-uuid.cov
 # install -D ./xenops_xl_main.native        %{buildroot}%{_sbindir}/xenopsd-xenlight.cov
 # install -D ./xenops_simulator_main.native %{buildroot}%{_sbindir}/xenopsd-simulator.cov
 
-# touch files that are created dynamically and are %ghost'ed in %files
 touch %{buildroot}%{_sbindir}/xenopsd-xenlight
 touch %{buildroot}%{_sbindir}/xenopsd-simulator
 touch %{buildroot}%{_sbindir}/xenopsd-xc
 touch %{buildroot}%{_libexecdir}/%{name}/set-domain-uuid
+
 
 # this is the same for both builds - should really be in Makefile
 gzip %{buildroot}%{_mandir}/man1/*.1
@@ -310,9 +313,10 @@ esac
 
 
 %changelog
-* Fri May 20 2016 Christian Lindig <christian.lindig@citrix.com> - * 0.12.1-1
+* Fri May 20 2016 Christian Lindig <christian.lindig@citrix.com> 
+- 0.12.1
 - New upstream release that supports coverage analysis
-- Introduce subpackages *-cov for coverage analysis
+- Introduce subpacke *-cov for coverage analysis
 
 * Mon May 16 2016 Si Beaumont <simon.beaumont@citrix.com> - 0.12.0-2
 - Re-run chkconfig on upgrade
@@ -411,3 +415,4 @@ esac
 * Thu May 30 2013 David Scott <dave.scott@eu.citrix.com>
 - Initial package
 
+# vim: set ts=2 sw=2 et:
