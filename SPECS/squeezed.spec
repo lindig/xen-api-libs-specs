@@ -1,6 +1,6 @@
 Name:           squeezed
 Version:        0.12.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Memory ballooning daemon for the xapi toolstack
 License:        LGPL
 URL:            https://github.com/xapi-project/squeezed
@@ -78,6 +78,7 @@ install -D -m 0644 squeezed-conf %{buildroot}%{_sysconfdir}/squeezed.conf
 %post
 case $1 in
   1) # install
+    rm -f %{_sbindir}/squeezed
     ln -s %{_sbindir}/squeezed.bin %{_sbindir}/squeezed
     /sbin/chkconfig --add squeezed
     ;;
@@ -116,6 +117,7 @@ enabled.
 %post coverage
 case $1 in
   1) # install
+    rm -f %{_sbindir}/squeezed
     ln -s %{_sbindir}/squeezed.cov %{_sbindir}/squeezed
     /sbin/chkconfig --add squeezed
     ;;
@@ -140,6 +142,9 @@ esac
 
 
 %changelog
+* Thu May 26 2016 Christian Lindig <christian.lindig@citrix.com> - 0.12.1-2
+- Fix %post: rm existing symlink before installation
+
 * Fri May 20 2016 Christian Lindig <christian.lindig@citrix.com> - 0.12.1-1
 - New sub-package for coverage analysis (from new upstream release)
 
