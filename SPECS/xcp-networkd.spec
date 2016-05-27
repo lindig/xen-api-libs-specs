@@ -86,15 +86,13 @@ install -D -m 0644 xcp-networkd-conf %{buildroot}/etc/xcp-networkd.conf
 %post
 case $1 in
   1) # install
-    ln -s %{_sbindir}/xcp-networkd.bin  %{_sbindir}/xcp-networkd
-    ln -s %{_bindir}/networkd_db.bin    %{_bindir}/networkd_db
+    ln -fs %{_sbindir}/xcp-networkd.bin  %{_sbindir}/xcp-networkd
+    ln -fs %{_bindir}/networkd_db.bin    %{_bindir}/networkd_db
     /sbin/chkconfig --add xcp-networkd
     ;;
   2) # upgrade
-    rm -f %{_sbindir}/xcp-networkd
-    rm -f %{_bindir}/networkd_db
-    ln -s %{_sbindir}/xcp-networkd.bin  %{_sbindir}/xcp-networkd
-    ln -s %{_bindir}/networkd_db.bin    %{_bindir}/networkd_db
+    ln -fs %{_sbindir}/xcp-networkd.bin  %{_sbindir}/xcp-networkd
+    ln -fs %{_bindir}/networkd_db.bin    %{_bindir}/networkd_db
     /sbin/chkconfig --del xcp-networkd
     /sbin/chkconfig --add xcp-networkd
     ;;
@@ -126,17 +124,13 @@ This package enables coverage profiling.
 %post coverage
 case $1 in
   1) # install
-    rm -f %{_sbindir}/xcp-networkd
-    rm -f %{_bindir}/networkd_db
-    ln -s %{_sbindir}/xcp-networkd.cov  %{_sbindir}/xcp-networkd
-    ln -s %{_bindir}/networkd_db.cov    %{_bindir}/networkd_db
+    ln -fs %{_sbindir}/xcp-networkd.cov  %{_sbindir}/xcp-networkd
+    ln -fs %{_bindir}/networkd_db.cov    %{_bindir}/networkd_db
     /sbin/chkconfig --add xcp-networkd
     ;;
   2) # upgrade
-    rm -f %{_sbindir}/xcp-networkd
-    rm -f %{_bindir}/networkd_db
-    ln -s %{_sbindir}/xcp-networkd.cov  %{_sbindir}/xcp-networkd
-    ln -s %{_bindir}/networkd_db.cov    %{_bindir}/networkd_db
+    ln -fs %{_sbindir}/xcp-networkd.cov  %{_sbindir}/xcp-networkd
+    ln -fs %{_bindir}/networkd_db.cov    %{_bindir}/networkd_db
     /sbin/chkconfig --del xcp-networkd
     /sbin/chkconfig --add xcp-networkd
     ;;
