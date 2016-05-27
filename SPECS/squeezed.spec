@@ -78,13 +78,11 @@ install -D -m 0644 squeezed-conf %{buildroot}%{_sysconfdir}/squeezed.conf
 %post
 case $1 in
   1) # install
-    rm -f %{_sbindir}/squeezed
-    ln -s %{_sbindir}/squeezed.bin %{_sbindir}/squeezed
+    ln -fs %{_sbindir}/squeezed.bin %{_sbindir}/squeezed
     /sbin/chkconfig --add squeezed
     ;;
   2) # upgrade
-    rm -f %{_sbindir}/squeezed
-    ln -s %{_sbindir}/squeezed.bin %{_sbindir}/squeezed
+    ln -fs %{_sbindir}/squeezed.bin %{_sbindir}/squeezed
     /sbin/chkconfig --del squeezed
     /sbin/chkconfig --add squeezed
     ;;
@@ -117,13 +115,11 @@ enabled.
 %post coverage
 case $1 in
   1) # install
-    rm -f %{_sbindir}/squeezed
-    ln -s %{_sbindir}/squeezed.cov %{_sbindir}/squeezed
+    ln -fs %{_sbindir}/squeezed.cov %{_sbindir}/squeezed
     /sbin/chkconfig --add squeezed
     ;;
   2) # upgrade
-    rm -f %{_sbindir}/squeezed
-    ln -s %{_sbindir}/squeezed.cov %{_sbindir}/squeezed
+    ln -fs %{_sbindir}/squeezed.cov %{_sbindir}/squeezed
     /sbin/chkconfig --del squeezed
     /sbin/chkconfig --add squeezed
     ;;
