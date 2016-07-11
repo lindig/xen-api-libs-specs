@@ -1,14 +1,13 @@
 # -*- rpm-spec -*-
 Summary: Command-line tools for manipulating and streaming .vhd format files
 Name:    vhd-tool
-Version: 0.8.0
+Version: 0.7.5
 Release: 2%{?dist}
 License: LGPL+linking exception
 URL:  https://github.com/xapi-project/vhd-tool
 Source0: https://github.com/xapi-project/vhd-tool/archive/v%{version}/vhd-tool-%{version}.tar.gz
 Source1: vhd-tool-sparse_dd-conf
 BuildRequires: ocaml
-BuildRequires: oasis
 BuildRequires: ocaml-findlib
 BuildRequires: ocaml-ocamldoc
 BuildRequires: ocaml-vhd-devel
@@ -52,10 +51,6 @@ install -m 755 get_vhd_vsize.native %{buildroot}/%{_libexecdir}/xapi/get_vhd_vsi
 %{_libexecdir}/xapi/get_vhd_vsize
 
 %changelog
-* Thu Jun 23 2016 Thomas Sanders <thomas.sanders@citrix.com> - 0.8.0
-- BuildRequires oasis, to do oasis autogeneration at build-time.
-- Update to 0.8.0
-
 * Thu Oct 1 2015 Jon Ludlam <jonathan.ludlam@citrix.com> - 0.7.5-2
 - Add get_vhd_vsize
 
