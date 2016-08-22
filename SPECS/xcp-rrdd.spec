@@ -1,5 +1,5 @@
 Name:           xcp-rrdd
-Version:        1.0.1
+Version:        1.1.0
 Release:        1%{?dist}
 Summary:        Statistics gathering daemon for the xapi toolstack
 License:        LGPL
@@ -26,6 +26,7 @@ BuildRequires:  xen-dom0-libs-devel
 BuildRequires:  xen-libs-devel
 BuildRequires:  blktap-devel
 BuildRequires:  ocaml-bisect-ppx-devel
+BuildRequires:  ocaml-inotify
 #Requires:       redhat-lsb-core
 
 Requires(post): /sbin/chkconfig
@@ -78,6 +79,11 @@ case $1 in
 esac
 
 %changelog
+* Mon Aug 22 2016 Christian Lindig <christian.lindig@citrix.com> - 1.1.0-1
+- update to 1.1.0
+- xcp-rrdd implements a new mechanism to discover plugins
+- new build requirement: ocaml-inotify
+
 * Mon Jul 25 2016 Jon Ludlam <jonathan.ludlam@citrix.com> - 1.0.1-1
 - Update to 1.0.1
 
