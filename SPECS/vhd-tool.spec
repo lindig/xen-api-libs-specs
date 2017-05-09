@@ -2,7 +2,7 @@
 Summary: Command-line tools for manipulating and streaming .vhd format files
 Name:    vhd-tool
 Version: 0.8.0
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: LGPL+linking exception
 URL:  https://github.com/xapi-project/vhd-tool
 Source0: https://github.com/xapi-project/vhd-tool/archive/v%{version}/vhd-tool-%{version}.tar.gz
@@ -52,6 +52,9 @@ install -m 755 get_vhd_vsize.native %{buildroot}/%{_libexecdir}/xapi/get_vhd_vsi
 %{_libexecdir}/xapi/get_vhd_vsize
 
 %changelog
+* Tue May 9 2017 Zheng Li <zheng.li3@citrix.com> - 0.8.0-5
+- Use ocaml-nbd-v1.0.3-1 (fixing CA-241818)
+
 * Thu Mar 23 2017 Frederico Mazzone <frederico.mazzone@citrix.com> - 0.8.0-4
 - Use ocaml-vhd-v0.7.3-5 - Fixes CA-244698 by backporting fix for CA-218219
 
