@@ -1,12 +1,13 @@
 %global debug_package %{nil}
 
 Name:           ocaml-xen-api-libs-transitional
-Version:        0.9.10
+Version:        1.0.1
 Release:        1%{?dist}
 Summary:        Deprecated standard library extension for OCaml
 License:        LGPL2.1 + OCaml linking exception
 URL:            https://github.com/xapi-project/xen-api-libs-transitional
 Source0:        https://github.com/xapi-project/xen-api-libs-transitional/archive/v%{version}/xen-api-libs-transitional-%{version}.tar.gz
+Patch0:         HFX-1986-Revert-Use-packed-stdext.patch
 BuildRequires:  forkexecd-devel
 BuildRequires:  ocaml
 BuildRequires:  ocaml-findlib
@@ -38,6 +39,7 @@ developing applications that use %{name}.
 
 %prep
 %setup -q -n xen-api-libs-transitional-%{version}
+%patch0 -p1
 
 %build
 make
@@ -166,6 +168,14 @@ make install DESTDIR=$OCAMLFIND_DESTDIR
 %{_libdir}/ocaml/xml-light2/*.mli
 
 %changelog
+* Wed Sep 13 2017 Frederico Mazzone <frederico.mazzone@citrix.com> - 1.0.1-1
+- CA-245559: Bugfix for http_svr handling pipeline requests
+- Fix dependencies in uuid
+- Stable release
+- Version upgrade has "Use packed stdext" but we explicitly revert this
+  change for Dundee backport of CA-245559 (HFX-1986)
+- Update Travis
+
 * Tue Apr 26 2016 Euan Harris <euan.harris@citrix.com> - 0.9.10-1 
 - Add support for configuring stunnel's cipher suites
 

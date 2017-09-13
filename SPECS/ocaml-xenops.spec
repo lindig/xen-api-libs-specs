@@ -2,7 +2,7 @@
 
 Name:           ocaml-xenops
 Version:        1.0.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Low-level xen control operations OCaml
 License:        LGPL
 URL:            https://github.com/xapi-project/xenops
@@ -76,6 +76,10 @@ make install BINDIR=%{buildroot}/%{_bindir}
 %{_bindir}/list_domains
 
 %changelog
+* Fri Sep 15 2017 Frederico Mazzone <frederico.mazzone@citrix.com> - 1.0.0-2
+- HFX-1986: Compile against new xen-api-libs-transitional which
+  contains the fix for CA-245559
+
 * Wed Apr 27 2016 Euan Harris <euan.harris@citrix.com> - 1.0.0-1
 - Update to 1.0.0
 

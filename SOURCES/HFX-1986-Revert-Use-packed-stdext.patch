@@ -1,0 +1,387 @@
+From 7309e3c48a97bdb81c97da07c69680985a84e94b Mon Sep 17 00:00:00 2001
+From: Frederico Mazzone <frederico.mazzone@citrix.com>
+Date: Fri, 15 Sep 2017 09:59:28 +0100
+Subject: [PATCH] Revert "Use packed stdext" (for HFX-1986)
+
+This reverts commit 8d76579b4367dfa68fabff011f8c4459585d5062.
+
+The Stdext that Dundee uses is unpacked, so Stdext cannot be
+referred to in Dundee as it is in the reverted commit.
+
+Signed-off-by: Frederico Mazzone <frederico.mazzone@citrix.com>
+---
+ gzip/gzip.ml              | 1 -
+ http-svr/http.ml          | 1 -
+ http-svr/http_client.ml   | 1 -
+ http-svr/http_proxy.ml    | 1 -
+ http-svr/http_svr.ml      | 1 -
+ http-svr/mime.ml          | 4 ++--
+ http-svr/radix_tree.ml    | 2 +-
+ http-svr/server_io.ml     | 1 -
+ http-svr/ws_helpers.ml    | 6 +++---
+ http-svr/xMLRPC.ml        | 4 ++--
+ http-svr/xMLRPC.mli       | 4 ++--
+ http-svr/xmlrpc_client.ml | 1 -
+ pciutil/pciutil.ml        | 6 ++++--
+ sexpr/sExpr.ml            | 2 +-
+ sexpr/sExpr_TS.ml         | 3 ++-
+ sha1/sha1sum.ml           | 1 -
+ stunnel/stunnel.ml        | 1 -
+ stunnel/stunnel_cache.ml  | 1 -
+ xenstore/watch.ml         | 2 +-
+ xml-light2/xml.ml         | 6 +++---
+ xml-light2/xml.mli        | 4 ++--
+ 21 files changed, 23 insertions(+), 30 deletions(-)
+
+diff --git a/gzip/gzip.ml b/gzip/gzip.ml
+index a2fb321..8e81b72 100644
+--- a/gzip/gzip.ml
++++ b/gzip/gzip.ml
+@@ -12,7 +12,6 @@
+  * GNU Lesser General Public License for more details.
+  *)
+ 
+-open Stdext
+ open Pervasiveext
+ 
+ (** Path to the gzip binary *)
+diff --git a/http-svr/http.ml b/http-svr/http.ml
+index 00eed73..ca3a3d5 100644
+--- a/http-svr/http.ml
++++ b/http-svr/http.ml
+@@ -14,7 +14,6 @@
+ 
+ (* A very very simple HTTP server! *)
+ 
+-open Stdext
+ open Xstringext
+ open Pervasiveext
+ open Fun
+diff --git a/http-svr/http_client.ml b/http-svr/http_client.ml
+index 1731b77..9cc37ca 100644
+--- a/http-svr/http_client.ml
++++ b/http-svr/http_client.ml
+@@ -13,7 +13,6 @@
+  *)
+ (* A very simple HTTP client *)
+ 
+-open Stdext
+ open Xstringext
+ 
+ module D = Debug.Make(struct let name="http" end)
+diff --git a/http-svr/http_proxy.ml b/http-svr/http_proxy.ml
+index 12076ff..4ee9fd4 100644
+--- a/http-svr/http_proxy.ml
++++ b/http-svr/http_proxy.ml
+@@ -16,7 +16,6 @@ module D=Debug.Make(struct let name="http_proxy" end)
+ open D
+ 
+ open Xmlrpc_client
+-open Stdext
+ open Threadext
+ open Pervasiveext
+ 
+diff --git a/http-svr/http_svr.ml b/http-svr/http_svr.ml
+index d6abd95..41018db 100644
+--- a/http-svr/http_svr.ml
++++ b/http-svr/http_svr.ml
+@@ -29,7 +29,6 @@
+  *
+  *)
+ 
+-open Stdext
+ open Http
+ open Xstringext
+ open Pervasiveext
+diff --git a/http-svr/mime.ml b/http-svr/mime.ml
+index 0042ea9..ae2f2d3 100644
+--- a/http-svr/mime.ml
++++ b/http-svr/mime.ml
+@@ -13,7 +13,7 @@
+  *)
+ (* MIME handling for HTTP responses *)
+ 
+-open Stdext.Xstringext
++open Xstringext
+ open Printf
+ 
+ (** Map extension to MIME type *)
+@@ -22,7 +22,7 @@ type t = (string, string) Hashtbl.t
+ (** Parse an Apache-format mime.types file and return mime_t *)
+ let mime_of_file file =
+     let h = Hashtbl.create 1024 in
+-    Stdext.Unixext.readfile_line (fun line ->
++    Unixext.readfile_line (fun line ->
+         if not (String.startswith "#" line) then begin
+             match String.split_f String.isspace line with
+             |[] |[_] -> ()
+diff --git a/http-svr/radix_tree.ml b/http-svr/radix_tree.ml
+index cbbbc9f..ac9b331 100644
+--- a/http-svr/radix_tree.ml
++++ b/http-svr/radix_tree.ml
+@@ -79,6 +79,6 @@ let fold f acc t =
+ 	let rec inner p acc = function
+ 		| Node (p', v, ns) ->
+ 			let pp = p ^ p' in
+-			let acc = Stdext.Opt.default acc (Stdext.Opt.map (fun v -> f pp v acc) v) in
++			let acc = Opt.default acc (Opt.map (fun v -> f pp v acc) v) in
+ 			List.fold_left (fun acc n -> inner pp acc n) acc ns in
+ 	inner "" acc t
+diff --git a/http-svr/server_io.ml b/http-svr/server_io.ml
+index 4af2895..035f330 100644
+--- a/http-svr/server_io.ml
++++ b/http-svr/server_io.ml
+@@ -13,7 +13,6 @@
+  *)
+ 
+ open Unix
+-open Stdext
+ open Pervasiveext
+ open Threadext
+ 
+diff --git a/http-svr/ws_helpers.ml b/http-svr/ws_helpers.ml
+index 56d59a3..03de71a 100644
+--- a/http-svr/ws_helpers.ml
++++ b/http-svr/ws_helpers.ml
+@@ -27,7 +27,7 @@
+  * http://tools.ietf.org/html/draft-ietf-hybi-thewebsocketprotocol-17 
+  *)
+ 
+-open Stdext.Xstringext
++open Xstringext
+ 
+ type protocol = | Hixie76 | Hybi10
+ 
+@@ -201,7 +201,7 @@ let v10_upgrade req s =
+   let key = find_header headers "sec-websocket-key" in
+   (*let vsn = find_header headers "sec-websocket-version" in*)
+   let result = sha_1 (key ^ ws_uuid) in
+-  let key = Stdext.Base64.encode result in 
++  let key = Base64.encode result in 
+   let headers = http_101_websocket_upgrade_15 key in
+   Http.output_http s headers
+ 
+@@ -219,7 +219,7 @@ let hixie_v76_upgrade req s =
+   let s1 = marshal_int32 v1 in
+   let s2 = marshal_int32 v2 in
+   let s3 = String.make 8 '\000' in
+-  Stdext.Unixext.really_read s s3 0 8;
++  Unixext.really_read s s3 0 8;
+   let string = Printf.sprintf "%s%s%s" s1 s2 s3 in
+   let digest = Digest.string string in
+   
+diff --git a/http-svr/xMLRPC.ml b/http-svr/xMLRPC.ml
+index 1b5113e..f66be28 100644
+--- a/http-svr/xMLRPC.ml
++++ b/http-svr/xMLRPC.ml
+@@ -59,7 +59,7 @@ module To = struct
+ 
+   let boolean b = value (box "boolean" [pcdata (if b then "1" else "0")])
+ 
+-  let datetime s = value (box "dateTime.iso8601" [pcdata (Stdext.Date.to_string s)])
++  let datetime s = value (box "dateTime.iso8601" [pcdata (Date.to_string s)])
+ 
+   let double x =
+     let txt = match classify_float x with
+@@ -156,7 +156,7 @@ module From = struct
+ 
+   let boolean = value (singleton ["boolean"] ((<>) (Xml.PCData "0")))
+ 
+-  let datetime x = Stdext.Date.of_string (value (singleton ["dateTime.iso8601"] (pcdata id)) x)
++  let datetime x = Date.of_string (value (singleton ["dateTime.iso8601"] (pcdata id)) x)
+ 
+   let double = value (singleton ["double"] (pcdata float_of_string))
+ 
+diff --git a/http-svr/xMLRPC.mli b/http-svr/xMLRPC.mli
+index 8b48ebd..a0ab0f6 100644
+--- a/http-svr/xMLRPC.mli
++++ b/http-svr/xMLRPC.mli
+@@ -55,7 +55,7 @@ module To : sig
+   val boolean : bool -> xmlrpc
+ 
+   (** Marshal a date-time. *)
+-  val datetime : Stdext.Date.iso8601 -> xmlrpc
++  val datetime : Date.iso8601 -> xmlrpc
+ 
+   (** Marshal a double. *)
+   val double : float -> xmlrpc
+@@ -93,7 +93,7 @@ module From : sig
+   val boolean : xmlrpc -> bool
+ 
+   (** Parse a date-time. *)
+-  val datetime : xmlrpc -> Stdext.Date.iso8601
++  val datetime : xmlrpc -> Date.iso8601
+ 
+   (** Parse a double. *)
+   val double : xmlrpc -> float
+diff --git a/http-svr/xmlrpc_client.ml b/http-svr/xmlrpc_client.ml
+index 8deb776..15c4210 100644
+--- a/http-svr/xmlrpc_client.ml
++++ b/http-svr/xmlrpc_client.ml
+@@ -11,7 +11,6 @@
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU Lesser General Public License for more details.
+  *)
+-open Stdext
+ open Xstringext
+ open Pervasiveext
+ open Threadext
+diff --git a/pciutil/pciutil.ml b/pciutil/pciutil.ml
+index 2276521..f1ae223 100644
+--- a/pciutil/pciutil.ml
++++ b/pciutil/pciutil.ml
+@@ -15,6 +15,8 @@
+  * Util to parse pciids
+  *)
+ 
++open Xstringext
++
+ (* defaults, if we can't find better information: *)
+ let unknown_vendor vendor = Some (Printf.sprintf "Unknown vendor %s" vendor)
+ let unknown_device device = Some (Printf.sprintf "Unknown device %s" device)
+@@ -25,7 +27,7 @@ let parse_from file vendor device =
+ 	   When we find a device match we only accept it if it's from the right vendor; it doesn't make 
+ 	   sense to pair vendor 2's device with vendor 1. *)
+ 	let current_xvendor = ref "" in
+-	Stdext.Unixext.readfile_line (fun line ->
++	Unixext.readfile_line (fun line ->
+ 		if line = "" || line.[0] = '#' ||
+ 		   (line.[0] = '\t' && line.[1] = '\t') then
+ 			(* ignore subvendors/subdevices, blank lines and comments *)
+@@ -39,7 +41,7 @@ let parse_from file vendor device =
+ 					if xdevice = device then (
+ 						device_str := Some (String.sub line 7 (String.length line - 7));
+ 						(* abort reading, we found what we want *)
+-						raise Stdext.Unixext.Break
++						raise Unixext.Break
+ 					)
+ 				)
+ 			) else (
+diff --git a/sexpr/sExpr.ml b/sexpr/sExpr.ml
+index 1712deb..772a998 100644
+--- a/sexpr/sExpr.ml
++++ b/sexpr/sExpr.ml
+@@ -17,7 +17,7 @@ type t =
+   | String of string
+   | WeirdString of string * string
+ 
+-open Stdext.Xstringext
++open Xstringext
+ 
+ let unescape_buf buf s =
+   let aux esc = function
+diff --git a/sexpr/sExpr_TS.ml b/sexpr/sExpr_TS.ml
+index c599f41..8ad57b8 100644
+--- a/sexpr/sExpr_TS.ml
++++ b/sexpr/sExpr_TS.ml
+@@ -11,11 +11,12 @@
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU Lesser General Public License for more details.
+  *)
++open Threadext
+ 
+ let lock = Mutex.create ()
+ 
+ let of_string s =
+-	Stdext.Threadext.Mutex.execute lock
++	Mutex.execute lock
+ 		(fun () -> SExprParser.expr SExprLexer.token (Lexing.from_string s))
+ 
+ let string_of = SExpr.string_of
+diff --git a/sha1/sha1sum.ml b/sha1/sha1sum.ml
+index f94a08f..f289659 100644
+--- a/sha1/sha1sum.ml
++++ b/sha1/sha1sum.ml
+@@ -15,7 +15,6 @@
+ (** Path to the sha1sum binary (used in the new import/export code to append checksums *)
+ let sha1sum = "/usr/bin/sha1sum"
+ 
+-open Stdext
+ open Pervasiveext
+ open Xstringext
+ 
+diff --git a/stunnel/stunnel.ml b/stunnel/stunnel.ml
+index dbf894a..f9cab1b 100644
+--- a/stunnel/stunnel.ml
++++ b/stunnel/stunnel.ml
+@@ -17,7 +17,6 @@ module D=Debug.Make(struct let name="stunnel" end)
+ open D
+ let trim = String.trim
+ 
+-open Stdext
+ open Printf
+ open Pervasiveext
+ open Xstringext
+diff --git a/stunnel/stunnel_cache.ml b/stunnel/stunnel_cache.ml
+index 4ca7892..7282c0a 100644
+--- a/stunnel/stunnel_cache.ml
++++ b/stunnel/stunnel_cache.ml
+@@ -52,7 +52,6 @@ let times : (int, float) Hashtbl.t ref = ref (Hashtbl.create capacity)
+ (** A mapping of stunnel unique ID to Stunnel.t *)
+ let stunnels : (int, Stunnel.t) Hashtbl.t ref = ref (Hashtbl.create capacity)
+ 
+-open Stdext
+ open Pervasiveext
+ open Threadext
+ open Listext
+diff --git a/xenstore/watch.ml b/xenstore/watch.ml
+index cd7ed86..0bc32a3 100644
+--- a/xenstore/watch.ml
++++ b/xenstore/watch.ml
+@@ -31,7 +31,7 @@ let has_fired ~xs x =
+ let wait_for ~xs ?(timeout=300.) (x: 'a t) =
+   let task = Xs.wait x.evaluate in
+   let (p1,p2) = Unix.pipe () in
+-  Stdext.Pervasiveext.finally (fun () -> 
++  Pervasiveext.finally (fun () -> 
+ 	  let thread = Thread.create (fun () ->
+ 		  let r,_,_ = Unix.select [p1] [] [] timeout in
+ 		  if List.length r > 0 then () else begin
+diff --git a/xml-light2/xml.ml b/xml-light2/xml.ml
+index 64ebba6..8df1918 100644
+--- a/xml-light2/xml.ml
++++ b/xml-light2/xml.ml
+@@ -89,7 +89,7 @@ let parse_bigbuffer b =
+ 	let n = ref Int64.zero in
+ 	let aux () =
+ 		try 
+-			let c = Stdext.Bigbuffer.get b !n in
++			let c = Bigbuffer.get b !n in
+ 			n := Int64.add !n Int64.one;
+ 			int_of_char c
+ 		with _ -> raise End_of_file in
+@@ -186,8 +186,8 @@ let to_string_fmt xml =
+ 	let s = Buffer.contents buffer in Buffer.reset buffer; s
+ 
+ let to_bigbuffer xml = 
+-	let buffer = Stdext.Bigbuffer.make () in
+-	to_fct xml (fun s -> Stdext.Bigbuffer.append_substring buffer s 0 (String.length s));
++	let buffer = Bigbuffer.make () in
++	to_fct xml (fun s -> Bigbuffer.append_substring buffer s 0 (String.length s));
+ 	buffer
+ 
+ (* helpers functions *)
+diff --git a/xml-light2/xml.mli b/xml-light2/xml.mli
+index 97c3104..46bfb0e 100644
+--- a/xml-light2/xml.mli
++++ b/xml-light2/xml.mli
+@@ -27,14 +27,14 @@ val error : error -> string
+ val parse_file : string -> xml
+ val parse_in : in_channel -> xml
+ val parse_string : string -> xml
+-val parse_bigbuffer : Stdext.Bigbuffer.t -> xml
++val parse_bigbuffer : Bigbuffer.t -> xml
+ 
+ (** output functions *)
+ val to_fct : xml -> (string -> unit) -> unit
+ val to_fct_fmt : xml -> (string -> unit) -> unit
+ val to_string : xml -> string
+ val to_string_fmt : xml -> string
+-val to_bigbuffer : xml -> Stdext.Bigbuffer.t
++val to_bigbuffer : xml -> Bigbuffer.t
+ 
+ (** helper functions *)
+ exception Not_pcdata of string
+-- 
+2.7.4
+

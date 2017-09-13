@@ -1,6 +1,6 @@
 Name:           xcp-rrdd
 Version:        1.0.0
-Release:        1%{?dist}
+Release:        3%{?dist}
 Summary:        Statistics gathering daemon for the xapi toolstack
 License:        LGPL
 URL:            https://github.com/xapi-project/xcp-rrdd
@@ -61,6 +61,10 @@ if [ $1 -eq 0 ]; then
 fi
 
 %changelog
+* Fri Sep 15 2017 Frederico Mazzone <frederico.mazzone@citrix.com> - 1.0.0-3
+- HFX-1986: Compile against new xen-api-libs-transitional which
+  contains the fix for CA-245559
+
 * Wed Apr 27 2016 Euan Harris <euan.harris@citrix.com> - 1.0.0-1
 - Update to 1.0.0
 
