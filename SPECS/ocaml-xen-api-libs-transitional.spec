@@ -1,7 +1,7 @@
 %global debug_package %{nil}
 
 Name:           ocaml-xen-api-libs-transitional
-Version:        1.0.1
+Version:        1.0.2
 Release:        1%{?dist}
 Summary:        Deprecated standard library extension for OCaml
 License:        LGPL2.1 + OCaml linking exception
@@ -168,6 +168,9 @@ make install DESTDIR=$OCAMLFIND_DESTDIR
 %{_libdir}/ocaml/xml-light2/*.mli
 
 %changelog
+* Wed Jul 25 2018 Christian Lindig <christian.lindig@citrix.com> - 1.0.2-1
+- CA-285840 Make sure stunnel doesn't hang talking to dead hosts
+
 * Wed Sep 13 2017 Frederico Mazzone <frederico.mazzone@citrix.com> - 1.0.1-1
 - CA-245559: Bugfix for http_svr handling pipeline requests
 - Fix dependencies in uuid
